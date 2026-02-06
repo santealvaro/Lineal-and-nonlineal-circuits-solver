@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>zlel.zlel_p1 &mdash; ZLEL 0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=837179f8"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ZLEL
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ZLEL</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">zlel.zlel_p1</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for zlel.zlel_p1</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. module:: zlel_maiy</span>
+<span class="sd">    :synopsis:</span>
+
+<span class="sd">.. moduleauthor:: YOUR NAME AND E-MAIL</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+
+<div class="viewcode-block" id="cir_parser">
+<a class="viewcode-back" href="../../zlel.html#zlel.zlel_p1.cir_parser">[docs]</a>
+<span class="k">def</span> <span class="nf">cir_parser</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function takes a .cir test circuit and parse it into</span>
+<span class="sd">        4 matices.</span>
+<span class="sd">        If the file has not the proper dimensions it warns and exit.</span>
+<span class="sd">        This function also ensures that the cir does not contain any of the</span>
+<span class="sd">        following errors:\\</span>
+
+<span class="sd">        |   There is a **reference node** defined.\n</span>
+<span class="sd">        |   There are **no floating nodes**.\n</span>
+<span class="sd">        |   There are **no parallel V sources**.\n</span>
+<span class="sd">        |   There are **no serial I sources**.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        **filename**: string with the name of the file</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        | **cir_el**: np array of strings with the elements to parse. size(1,b)</span>
+<span class="sd">        | **cir_nd**: np array with the nodes to the circuit. size(b,4)</span>
+<span class="sd">        | **cir_val**: np array with the values of the elements. size(b,3)</span>
+<span class="sd">        | **cir_ctrl**: np array of strings with the element which branch</span>
+<span class="sd">        | controls the controlled sources. size(1,b)</span>
+
+<span class="sd">    Rises:</span>
+<span class="sd">        SystemExit</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cir</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">&quot;File corrupted: .cir size is incorrect.&quot;</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">funtzioa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cir</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">lerro</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">8</span><span class="p">]])</span>
+            <span class="n">funtzioa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">funtzioa</span><span class="p">,</span> <span class="n">lerro</span><span class="p">])</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">cir_el</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cir</span><span class="p">[:</span><span class="o">-</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="c1"># THIS FUNCTION IS NOT COMPLETE</span>
+    <span class="n">cir_nd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cir</span><span class="p">[:</span><span class="o">-</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="mi">5</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">cir_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cir</span><span class="p">[:</span><span class="o">-</span><span class="n">i</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span><span class="mi">8</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">cir_ctrl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cir</span><span class="p">[:</span><span class="o">-</span><span class="n">i</span><span class="p">,</span> <span class="mi">8</span><span class="p">:],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">reference_node</span> <span class="o">=</span> <span class="n">cir_nd</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">reference_node</span><span class="p">[</span><span class="n">reference_node</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;Reference node &quot;0&quot; is not defined in the circuit.&#39;</span><span class="p">)</span>
+    <span class="n">hiztegi</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">lerro</span> <span class="ow">in</span> <span class="n">cir_nd</span><span class="p">:</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">elementu</span> <span class="ow">in</span> <span class="n">lerro</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;Q&quot;</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">char</span><span class="o">.</span><span class="n">upper</span><span class="p">(</span><span class="n">cir_el</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> <span class="s2">&quot;A&quot;</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">char</span><span class="o">.</span><span class="n">upper</span><span class="p">(</span>
+                <span class="n">cir_el</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">):</span>
+                <span class="k">if</span> <span class="n">elementu</span> <span class="ow">in</span> <span class="n">hiztegi</span><span class="p">:</span>
+                    <span class="n">hiztegi</span><span class="p">[</span><span class="n">elementu</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">hiztegi</span><span class="p">[</span><span class="n">elementu</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">elementu</span> <span class="ow">in</span> <span class="n">hiztegi</span><span class="p">:</span>
+                    <span class="n">hiztegi</span><span class="p">[</span><span class="n">elementu</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">hiztegi</span><span class="p">[</span><span class="n">elementu</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">giltza</span><span class="p">,</span> <span class="n">balioak</span> <span class="ow">in</span> <span class="n">hiztegi</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">balioak</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Node &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">giltza</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; is floating.&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cir</span><span class="p">:</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">line2</span> <span class="ow">in</span> <span class="n">cir</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">line2</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="s2">&quot;V&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="ow">or</span> <span class="s2">&quot;E&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="ow">or</span> <span class="s2">&quot;H&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="ow">or</span> <span class="s2">&quot;B&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                    <span class="s2">&quot;V&quot;</span> <span class="ow">in</span> <span class="n">line2</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="ow">or</span> <span class="s2">&quot;E&quot;</span> <span class="ow">in</span> <span class="n">line2</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="ow">or</span> <span class="s2">&quot;H&quot;</span> <span class="ow">in</span> <span class="n">line2</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="ow">or</span> <span class="s2">&quot;B&quot;</span> <span class="ow">in</span> <span class="n">line2</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                <span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">line2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">line2</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                        <span class="ow">or</span> <span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">line2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">and</span> <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">line2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                        <span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">!=</span> <span class="n">line2</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+                        <span class="ow">or</span> <span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">line2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">and</span> <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">line2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="p">):</span>
+                        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span>
+                            <span class="s2">&quot;Parallel V sources at branches &quot;</span>
+                            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                                <span class="nb">min</span><span class="p">(</span>
+                                    <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                                        <span class="n">np</span><span class="o">.</span><span class="n">char</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">cir_el</span><span class="p">,</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span>
+                                    <span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                                    <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                                        <span class="n">np</span><span class="o">.</span><span class="n">char</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">cir_el</span><span class="p">,</span> <span class="n">line2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span>
+                                    <span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                                <span class="p">)</span>
+                            <span class="p">)</span>
+                            <span class="o">+</span> <span class="s2">&quot; and &quot;</span>
+                            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                                <span class="nb">max</span><span class="p">(</span>
+                                    <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                                        <span class="n">np</span><span class="o">.</span><span class="n">char</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">cir_el</span><span class="p">,</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span>
+                                    <span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                                    <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+                                        <span class="n">np</span><span class="o">.</span><span class="n">char</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">cir_el</span><span class="p">,</span> <span class="n">line2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span>
+                                    <span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                                <span class="p">)</span>
+                            <span class="p">)</span>
+                            <span class="o">+</span> <span class="s2">&quot;.&quot;</span>
+                        <span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="s2">&quot;I&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="ow">or</span> <span class="s2">&quot;G&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="ow">or</span> <span class="s2">&quot;F&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="ow">or</span> <span class="s2">&quot;Y&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                    <span class="s2">&quot;I&quot;</span> <span class="ow">in</span> <span class="n">line2</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="ow">or</span> <span class="s2">&quot;G&quot;</span> <span class="ow">in</span> <span class="n">line2</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="ow">or</span> <span class="s2">&quot;F&quot;</span> <span class="ow">in</span> <span class="n">line2</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                    <span class="ow">or</span> <span class="s2">&quot;Y&quot;</span> <span class="ow">in</span> <span class="n">line2</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                <span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">line2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="ow">or</span> <span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">line2</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                        <span class="ow">or</span> <span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">line2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="ow">or</span> <span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">line2</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="p">):</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">line2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">line2</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                            <span class="n">a</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">line2</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">line2</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                            <span class="n">a</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                        <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">for</span> <span class="n">line3</span> <span class="ow">in</span> <span class="n">cir</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+                                <span class="s2">&quot;I&quot;</span> <span class="ow">in</span> <span class="n">line3</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                                <span class="ow">or</span> <span class="s2">&quot;G&quot;</span> <span class="ow">in</span> <span class="n">line3</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                            <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                                <span class="p">(</span>
+                                    <span class="p">(</span>
+                                        <span class="n">line3</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">line2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                                        <span class="ow">and</span> <span class="n">line3</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">line2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                                    <span class="p">)</span>
+                                    <span class="ow">or</span> <span class="p">(</span>
+                                        <span class="n">line3</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">line2</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                                        <span class="ow">and</span> <span class="n">line3</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">line2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                                    <span class="p">)</span>
+                                <span class="p">)</span>
+                                <span class="ow">or</span> <span class="p">(</span>
+                                    <span class="p">(</span>
+                                        <span class="n">line3</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                                        <span class="ow">and</span> <span class="n">line3</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                                    <span class="p">)</span>
+                                    <span class="ow">or</span> <span class="p">(</span>
+                                        <span class="n">line3</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                                        <span class="ow">and</span> <span class="n">line3</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                                    <span class="p">)</span>
+                                <span class="p">)</span>
+                            <span class="p">):</span>
+
+                                <span class="n">x</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">line3</span> <span class="ow">in</span> <span class="n">cir</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="p">(</span>
+                                    <span class="s2">&quot;I&quot;</span> <span class="ow">in</span> <span class="n">line3</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                                    <span class="ow">or</span> <span class="s2">&quot;G&quot;</span> <span class="ow">in</span> <span class="n">line3</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                                <span class="p">)</span> <span class="ow">and</span> <span class="p">((</span><span class="n">line3</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">a</span><span class="p">)):</span>
+                                    <span class="n">k</span> <span class="o">-=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line3</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+                                <span class="k">if</span> <span class="p">(</span>
+                                    <span class="s2">&quot;I&quot;</span> <span class="ow">in</span> <span class="n">line3</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                                    <span class="ow">or</span> <span class="s2">&quot;G&quot;</span> <span class="ow">in</span> <span class="n">line3</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                                <span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">line3</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">a</span><span class="p">):</span>
+                                    <span class="n">k</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line3</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span>
+                                <span class="s2">&quot;I sources in series at node &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span>
+                            <span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cir_el</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">cir_el</span><span class="p">,</span> <span class="n">cir_nd</span><span class="p">,</span> <span class="n">cir_val</span><span class="p">,</span> <span class="n">cir_ctrl</span><span class="p">,</span> <span class="n">funtzioa</span></div>
+
+
+
+<div class="viewcode-block" id="reshape">
+<a class="viewcode-back" href="../../zlel.html#zlel.zlel_p1.reshape">[docs]</a>
+<span class="k">def</span> <span class="nf">reshape</span><span class="p">(</span><span class="n">cir_el</span><span class="p">,</span> <span class="n">cir_nd</span><span class="p">,</span> <span class="n">cir_val</span><span class="p">,</span> <span class="n">cir_ctr</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function that will resize the two matrix by taking into account</span>
+<span class="sd">    if there are any transistros or OPAMP \n</span>
+<span class="sd">    Args:</span>
+<span class="sd">        **cir_el**: matrix got when parsing the circuit (circuit elements).\n</span>
+<span class="sd">        **cir_nd**: matrix got when parsing the circuit (nodes of each element)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        reshaped cir_el and cir_nd matrixes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">nodoak</span> <span class="ow">in</span> <span class="n">cir_nd</span><span class="p">:</span>
+        <span class="n">elementua</span> <span class="o">=</span> <span class="n">cir_el</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;Q_&quot;</span> <span class="ow">in</span> <span class="n">elementua</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">bc</span> <span class="o">=</span> <span class="n">cir_el</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_be&quot;</span>
+                <span class="n">be</span> <span class="o">=</span> <span class="n">cir_el</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_bc&quot;</span>
+                <span class="n">temp1</span> <span class="o">=</span> <span class="p">[</span><span class="n">bc</span><span class="p">]</span>
+                <span class="n">temp2</span> <span class="o">=</span> <span class="p">[</span><span class="n">be</span><span class="p">]</span>
+                <span class="n">temp3</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodoak</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">nodoak</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+                <span class="n">temp4</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodoak</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">nodoak</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">new_elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">temp1</span><span class="p">,</span> <span class="n">temp2</span><span class="p">])</span>
+                <span class="n">new_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">temp3</span><span class="p">,</span> <span class="n">temp4</span><span class="p">])</span>
+                <span class="n">new_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+                <span class="n">new_ctr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cir_ctr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cir_ctr</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">bc</span> <span class="o">=</span> <span class="n">cir_el</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_be&quot;</span>
+                <span class="n">be</span> <span class="o">=</span> <span class="n">cir_el</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_bc&quot;</span>
+                <span class="n">temp1</span> <span class="o">=</span> <span class="p">[</span><span class="n">bc</span><span class="p">]</span>
+                <span class="n">temp2</span> <span class="o">=</span> <span class="p">[</span><span class="n">be</span><span class="p">]</span>
+                <span class="n">temp3</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodoak</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">nodoak</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+                <span class="n">temp4</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodoak</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">nodoak</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">new_elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">new_elements</span><span class="p">,</span> <span class="n">temp1</span><span class="p">,</span> <span class="n">temp2</span><span class="p">])</span>
+                <span class="n">new_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">new_nodes</span><span class="p">,</span> <span class="n">temp3</span><span class="p">,</span> <span class="n">temp4</span><span class="p">])</span>
+                <span class="n">new_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">new_values</span><span class="p">,</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+                <span class="n">new_ctr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">new_ctr</span><span class="p">,</span> <span class="n">cir_ctr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cir_ctr</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+        <span class="k">elif</span> <span class="s2">&quot;A_&quot;</span> <span class="ow">in</span> <span class="n">elementua</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">In</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">cir_el</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;_in&quot;</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">cir_el</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;_ou&quot;</span>
+                <span class="n">temp1</span> <span class="o">=</span> <span class="p">[</span><span class="n">In</span><span class="p">]</span>
+                <span class="n">temp2</span> <span class="o">=</span> <span class="p">[</span><span class="n">out</span><span class="p">]</span>
+                <span class="n">temp3</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodoak</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nodoak</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="n">temp4</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodoak</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">nodoak</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
+                <span class="n">new_elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">temp1</span><span class="p">,</span> <span class="n">temp2</span><span class="p">])</span>
+                <span class="n">new_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">temp3</span><span class="p">,</span> <span class="n">temp4</span><span class="p">])</span>
+                <span class="n">new_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+                <span class="n">new_ctr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">cir_ctr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cir_ctr</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">In</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">cir_el</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;_in&quot;</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">cir_el</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;_ou&quot;</span>
+                <span class="n">temp1</span> <span class="o">=</span> <span class="p">[</span><span class="n">In</span><span class="p">]</span>
+                <span class="n">temp2</span> <span class="o">=</span> <span class="p">[</span><span class="n">out</span><span class="p">]</span>
+                <span class="n">temp3</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodoak</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nodoak</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="n">temp4</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodoak</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">nodoak</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span>
+                <span class="n">new_elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">new_elements</span><span class="p">,</span> <span class="n">temp1</span><span class="p">,</span> <span class="n">temp2</span><span class="p">])</span>
+                <span class="n">new_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">new_nodes</span><span class="p">,</span> <span class="n">temp3</span><span class="p">,</span> <span class="n">temp4</span><span class="p">])</span>
+                <span class="n">new_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">new_values</span><span class="p">,</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+                <span class="n">new_ctr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">new_ctr</span><span class="p">,</span> <span class="n">cir_ctr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cir_ctr</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">temp1</span> <span class="o">=</span> <span class="p">[</span><span class="n">cir_el</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">temp2</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodoak</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nodoak</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="n">new_elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">temp1</span><span class="p">)</span>
+                <span class="n">new_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">temp2</span><span class="p">)</span>
+                <span class="n">new_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">new_ctr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">cir_ctr</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">temp1</span> <span class="o">=</span> <span class="p">[</span><span class="n">cir_el</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">temp2</span> <span class="o">=</span> <span class="p">[</span><span class="n">nodoak</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nodoak</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="n">new_elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">new_elements</span><span class="p">,</span> <span class="n">temp1</span><span class="p">])</span>
+                <span class="n">new_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">new_nodes</span><span class="p">,</span> <span class="n">temp2</span><span class="p">])</span>
+                <span class="n">new_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">new_values</span><span class="p">,</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+                <span class="n">new_ctr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">([</span><span class="n">new_ctr</span><span class="p">,</span> <span class="n">cir_ctr</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">cir_el</span> <span class="o">=</span> <span class="n">new_elements</span>
+    <span class="n">cir_nd</span> <span class="o">=</span> <span class="n">new_nodes</span>
+    <span class="n">cir_val</span> <span class="o">=</span> <span class="n">new_values</span>
+    <span class="n">cir_ctr</span> <span class="o">=</span> <span class="n">new_ctr</span>
+    <span class="k">return</span> <span class="n">cir_el</span><span class="p">,</span> <span class="n">cir_nd</span><span class="p">,</span> <span class="n">cir_val</span><span class="p">,</span> <span class="n">cir_ctr</span></div>
+
+
+
+<div class="viewcode-block" id="print_cir_info">
+<a class="viewcode-back" href="../../zlel.html#zlel.zlel_p1.print_cir_info">[docs]</a>
+<span class="k">def</span> <span class="nf">print_cir_info</span><span class="p">(</span><span class="n">cir_el</span><span class="p">,</span> <span class="n">cir_nd</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">el_num</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prints the info of the circuit:</span>
+<span class="sd">        |     1.- Elements info</span>
+<span class="sd">        |     2.- Node info</span>
+<span class="sd">        |     3.- Branch info</span>
+<span class="sd">        |     4.- Variable info</span>
+<span class="sd">    Args:</span>
+<span class="sd">        | **cir_el**: reshaped cir_el</span>
+<span class="sd">        | **cir_nd**: reshaped cir_nd. Now it will be a(b,2) matrix</span>
+<span class="sd">        | **b**: number of branches</span>
+<span class="sd">        | **n**: number of nodes</span>
+<span class="sd">        | **nodes**: an array with the circuit nodes sorted</span>
+<span class="sd">        | **el_num**:  the number of elements</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Element info</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">el_num</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; Elements&quot;</span><span class="p">)</span>
+    <span class="c1"># Node info</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; Different nodes: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">nodes</span><span class="p">))</span>
+    <span class="c1"># Branch info</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; Branches: &quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">indent</span> <span class="o">=</span> <span class="mi">12</span>  <span class="c1"># Number of blanks for indent</span>
+        <span class="n">string</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span>
+            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">&quot;. branch:</span><span class="se">\t</span><span class="s2">&quot;</span>
+            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cir_el</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="o">+</span> <span class="s2">&quot;i&quot;</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="n">indent</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">cir_el</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">&quot;v&quot;</span><span class="o">.</span><span class="n">rjust</span><span class="p">(</span><span class="n">indent</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span>
+            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="o">+</span> <span class="s2">&quot; = e&quot;</span>
+            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cir_nd</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="o">+</span> <span class="s2">&quot; - e&quot;</span>
+            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cir_nd</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+
+    <span class="c1"># Variable info</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">b</span> <span class="o">+</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; variables: &quot;</span><span class="p">)</span>
+    <span class="c1"># print all the nodes but the first(0 because is sorted)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;e&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;i&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1"># print all the branches but the last to close it properly</span>
+    <span class="c1"># It works because the minuimum amount of branches in a circuit must be 2.</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;v&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;, &quot;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;v&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">b</span><span class="p">))</span></div>
+
+
+    <span class="c1"># IT IS RECOMMENDED TO USE THIS FUNCTION WITH NO MODIFICATION.</span>
+
+
+<div class="viewcode-block" id="incidence">
+<a class="viewcode-back" href="../../zlel.html#zlel.zlel_p1.incidence">[docs]</a>
+<span class="k">def</span> <span class="nf">incidence</span><span class="p">(</span><span class="n">cir_nd</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates an incidence matrix based on the reshaped cir_nd. \n</span>
+<span class="sd">    Args:</span>
+<span class="sd">        **cir_nd**: The reshaped cir_nd.\n</span>
+<span class="sd">        **nodes**: An array containing all of the different nodes.\n</span>
+<span class="sd">        **n**: The number of nodes.\n</span>
+<span class="sd">        **b**: The number of branches.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        **matrix**: The incidence matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cir_nd</span><span class="p">:</span>
+        <span class="n">pos1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">nodes</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">pos2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">nodes</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">matrix</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">pos1</span><span class="p">)][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">matrix</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">pos2</span><span class="p">)][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">matrix</span></div>
+
+
+
+<div class="viewcode-block" id="ez_linealak">
+<a class="viewcode-back" href="../../zlel.html#zlel.zlel_p1.ez_linealak">[docs]</a>
+<span class="k">def</span> <span class="nf">ez_linealak</span><span class="p">(</span><span class="n">cir_el</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;function that cheks if there are any diodes or transistors.\n</span>
+<span class="sd">    Args:</span>
+<span class="sd">        **cir_el**: matrix got when parsing the circuit (circuit elements).</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        **j**: The number of non lineal elements.\n</span>
+<span class="sd">        **ezlin**: matrix with the non lineal elements.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ezlin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cir_el</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;D&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+            <span class="n">ezlin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ezlin</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="s2">&quot;Q&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+            <span class="n">ezlin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ezlin</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">j</span><span class="p">,</span> <span class="n">ezlin</span></div>
+
+
+
+<div class="viewcode-block" id="MNUs">
+<a class="viewcode-back" href="../../zlel.html#zlel.zlel_p1.MNUs">[docs]</a>
+<span class="k">def</span> <span class="nf">MNUs</span><span class="p">(</span><span class="n">cir_el</span><span class="p">,</span> <span class="n">cir_val</span><span class="p">,</span> <span class="n">cir_ctr</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">denbora</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function creates the M, N and Us matrices</span>
+<span class="sd">    that are necessary to form the Tableau equations.\n</span>
+<span class="sd">    Args:</span>
+<span class="sd">        | **cir_el**:</span>
+<span class="sd">            np array of strings with the elements to parse. size(1,b)</span>
+<span class="sd">        | **cir_val**:</span>
+<span class="sd">            np array with the values of the elements. size(b,3)</span>
+<span class="sd">        | **cir_ctrl**:</span>
+<span class="sd">            np array of strings with the element which branch</span>
+<span class="sd">        | **b**: dimensions of cir_el.</span>
+<span class="sd">        | **denbora**:</span>
+<span class="sd">            argument for account time, necessary for dinamic circuits.</span>
+<span class="sd">        | **V**: List of voltages of non-linear elements.</span>
+<span class="sd">        | **h**: Time step.</span>
+<span class="sd">        | **g**: Matrix formed by g</span>
+<span class="sd">            =[[g11,g12],[g21,g22]],</span>
+<span class="sd">            neccesary for solving circuits with transistors.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        | **M**: &quot;Voltage matrix&quot;.</span>
+<span class="sd">        | **N**: &quot;Current matrix&quot;.</span>
+<span class="sd">        | **Us**: Vector of non V controlled elements.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">denbora</span><span class="p">)</span>
+    <span class="n">Vt</span> <span class="o">=</span> <span class="mf">8.6173324</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span> <span class="o">*</span> <span class="mi">300</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">b</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">b</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">Us</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">cir_el</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;R_&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+            <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">Us</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="s2">&quot;V_&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+            <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">Us</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="s2">&quot;I_&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+            <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">Us</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="s2">&quot;A_&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s2">&quot;IN&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+                <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">Us</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">Us</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="s2">&quot;D_&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+            <span class="n">Vd</span> <span class="o">=</span> <span class="n">V</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="o">-</span><span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="o">/</span> <span class="p">(</span><span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">Vt</span><span class="p">)</span>
+                <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">Vd</span> <span class="o">/</span> <span class="p">(</span><span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">Vt</span><span class="p">))</span>
+            <span class="p">)</span>
+            <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">Us</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">Vd</span> <span class="o">/</span> <span class="p">(</span><span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">Vt</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">Vd</span>
+            <span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="s2">&quot;_BE&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+            <span class="n">g11</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">g12</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">Ies</span> <span class="o">=</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">Ics</span> <span class="o">=</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">Bf</span> <span class="o">=</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">af</span> <span class="o">=</span> <span class="n">Bf</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">Bf</span><span class="p">)</span>
+            <span class="n">ar</span> <span class="o">=</span> <span class="n">Ies</span> <span class="o">*</span> <span class="n">af</span> <span class="o">/</span> <span class="n">Ics</span>
+            <span class="n">VBe</span> <span class="o">=</span> <span class="n">V</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">VBc</span> <span class="o">=</span> <span class="n">V</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">Ie</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">g11</span> <span class="o">*</span> <span class="n">VBe</span>
+                <span class="o">+</span> <span class="n">g12</span> <span class="o">*</span> <span class="n">VBc</span>
+                <span class="o">+</span> <span class="n">Ies</span> <span class="o">*</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">VBe</span> <span class="o">/</span> <span class="n">Vt</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="o">-</span> <span class="n">ar</span> <span class="o">*</span> <span class="n">Ics</span> <span class="o">*</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">VBc</span> <span class="o">/</span> <span class="n">Vt</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">g11</span>
+            <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">g12</span>
+            <span class="n">Us</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ie</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="s2">&quot;_BC&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+            <span class="n">g21</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">g22</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">Ies</span> <span class="o">=</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">Ics</span> <span class="o">=</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">VBe</span> <span class="o">=</span> <span class="n">V</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">VBc</span> <span class="o">=</span> <span class="n">V</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">Bf</span> <span class="o">=</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">af</span> <span class="o">=</span> <span class="n">Bf</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">Bf</span><span class="p">)</span>
+            <span class="n">Ic</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">g21</span> <span class="o">*</span> <span class="n">VBe</span>
+                <span class="o">+</span> <span class="n">g22</span> <span class="o">*</span> <span class="n">VBc</span>
+                <span class="o">-</span> <span class="n">af</span> <span class="o">*</span> <span class="n">Ies</span> <span class="o">*</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">VBe</span> <span class="o">/</span> <span class="n">Vt</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">Ics</span> <span class="o">*</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">VBc</span> <span class="o">/</span> <span class="n">Vt</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">g22</span>
+            <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">g21</span>
+            <span class="n">Us</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Ic</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="s2">&quot;C_&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+            <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">h</span> <span class="o">/</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">Us</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="s2">&quot;L_&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+            <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">h</span> <span class="o">/</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">Us</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="s2">&quot;E_&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Tentsioen bidez kontrolatutako tentsio iturria&quot;&quot;&quot;</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cir_el</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">char</span><span class="o">.</span><span class="n">upper</span><span class="p">(</span><span class="n">cir_ctr</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+                    <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">Us</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="s2">&quot;G_&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Tentsioen bidez kontrolatutako korronte iturria&quot;&quot;&quot;</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cir_el</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">char</span><span class="o">.</span><span class="n">upper</span><span class="p">(</span><span class="n">cir_ctr</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+                    <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">Us</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="s2">&quot;H_&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Korronteren bidez kontrolatutako tentsio iturria&quot;&quot;&quot;</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cir_el</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">char</span><span class="o">.</span><span class="n">upper</span><span class="p">(</span><span class="n">cir_ctr</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+
+                    <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">Us</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="s2">&quot;F_&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Korronteren bidez kontrolatutako korronte iturria&quot;&quot;&quot;</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cir_el</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">char</span><span class="o">.</span><span class="n">upper</span><span class="p">(</span><span class="n">cir_ctr</span><span class="p">[</span><span class="n">i</span><span class="p">]):</span>
+
+                    <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="n">k</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">Us</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="s2">&quot;B_&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+            <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">Us</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">Us</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span>
+                    <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">t</span>
+                    <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="mi">180</span>
+                <span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="s2">&quot;Y_&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+            <span class="n">M</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">N</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">Us</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">Us</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span>
+                    <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">t</span>
+                    <span class="o">+</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">cir_val</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="mi">180</span>
+                <span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">M</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">Us</span></div>
+
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">https://stackoverflow.com/questions/419163/what-does-if-name-main-do</span>
+<span class="sd">https://stackoverflow.com/questions/19747371/</span>
+<span class="sd">python-exit-commands-why-so-many-and-when-should-each-be-used</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;../cirs/all/1_zlel_opamp.cir&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse the circuit&quot;&quot;&quot;</span>
+    <span class="p">[</span><span class="n">cir_el</span><span class="p">,</span> <span class="n">cir_nd</span><span class="p">,</span> <span class="n">cir_val</span><span class="p">,</span> <span class="n">cir_ctr</span><span class="p">,</span> <span class="n">funtzioa</span><span class="p">]</span> <span class="o">=</span> <span class="n">cir_parser</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="p">[</span><span class="n">cir_el</span><span class="p">,</span> <span class="n">cir_nd</span><span class="p">,</span> <span class="n">cir_val</span><span class="p">,</span> <span class="n">cir_ctr</span><span class="p">]</span> <span class="o">=</span> <span class="n">reshape</span><span class="p">(</span>
+        <span class="n">cir_el</span><span class="p">,</span> <span class="n">cir_nd</span><span class="p">,</span> <span class="n">cir_val</span><span class="p">,</span> <span class="n">cir_ctr</span>
+    <span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;print info&quot;&quot;&quot;</span>
+    <span class="n">rows_el</span><span class="p">,</span> <span class="n">columns_el</span> <span class="o">=</span> <span class="n">cir_el</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">cir_nd</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">rows_el</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">cir_nd</span><span class="p">))</span>
+    <span class="n">rows_ctr</span><span class="p">,</span> <span class="n">columns_ctr</span> <span class="o">=</span> <span class="n">cir_ctr</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">el_num</span> <span class="o">=</span> <span class="n">rows_ctr</span>
+    <span class="n">print_cir_info</span><span class="p">(</span><span class="n">cir_el</span><span class="p">,</span> <span class="n">cir_nd</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">el_num</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;intzidentzia matrizea&quot;&quot;&quot;</span>
+    <span class="n">incidence_matrix</span> <span class="o">=</span> <span class="n">incidence</span><span class="p">(</span><span class="n">cir_nd</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">incidence matrix:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">incidence_matrix</span><span class="p">)</span>
+
+<span class="c1">#    THIS FUNCTION IS NOT COMPLETE</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, LASARTE ESCUDERO (jlasarte003@ikasle.ehu.eus), SANTE INSUA (asante001@ikasle.ehu.eus).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
